@@ -1,7 +1,6 @@
 package dao;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,11 +11,8 @@ import model.UserBean;
 
 public class SalesDao {
 
-	public void sales(UserBean ui,ArrayList<CartBean> cart) {
-		String url = "jdbc:mysql://localhost/ecsite";
-		String id = "root";
-		String pass = "password";
-		Connection conn = null;
+	public void sales(UserBean ui,ArrayList<CartBean> cart,Connection conn) {
+
 		PreparedStatement pstmt = null;
 		UserBean ub=ui;
 		int uid =ui.getId();
@@ -30,15 +26,11 @@ public class SalesDao {
 
 		{
 		//JDBcドライバの登録
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
-		}
+
 		//データベースへの接続
 		try {
 			//SQLの発行
-			conn = DriverManager.getConnection(url, id, pass);
+
 
 			for(int i=0;i<cart.size();i++) {
 				cb=cart.get(i);
@@ -68,8 +60,6 @@ public class SalesDao {
 					rs.close();
 				if (pstmt != null)
 					pstmt.close();
-				if (conn != null)
-					conn.close();
 			} catch (Exception ex) {
 			}
 

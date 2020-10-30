@@ -40,7 +40,6 @@ public class SerchServlet extends HttpServlet {
 		ProductDao pd =new ProductDao();
 		ProductBean pb =pd.product(name);
 		CategoryDao cd =new CategoryDao();
-		CategoryBean cb =new CategoryBean();
 		int cat_id=pb.getCat_id();
 		CategoryBean product =cd.Category(cat_id);
 

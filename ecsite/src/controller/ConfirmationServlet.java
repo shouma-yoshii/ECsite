@@ -1,6 +1,8 @@
 package controller;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import javax.servlet.RequestDispatcher;
@@ -11,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import dao.GetConnention;
 import dao.ProductDao;
 import dao.SalesDao;
 import model.CartBean;
@@ -54,42 +57,69 @@ public class ConfirmationServlet extends HttpServlet {
 		int cd=0;
 		int price=0;
 		int pStock=0;
-		int total=Integer.parseInt(request.getParameter("total"));
+		Connection connection =null;
 		UserBean ub = (UserBean)session.getAttribute("ui");
 		ArrayList<CartBean> cart =(ArrayList<CartBean>)session.getAttribute("cart");
 
-		for(int i =0;i<cart.size();i++) {
-			cb=cart.get(i);
+		try {
+			connection = GetConnention.getConnection();
+			connection.setAutoCommit(false);
+			for(int i =0;i<cart.size();i++) {
+				cb=cart.get(i);
 
-			 name=cb.getPro_name();
-			 stock=cb.getStock_no();
-			 cd=cb.getPro_cd();
-			 price=cb.getPro_price();
+				 name=cb.getPro_name();
+				 stock=cb.getStock_no();
+				 cd=cb.getPro_cd();
+				 price=cb.getPro_price();
+
+
+			ArrayList<ProductBean> product =pd.kensaku(name);
+
+			for(int b = 0;b<product.size();b++) {
+				pb=product.get(b);
+
+				pStock=pb.getStock_no();
+			}
+
+
+
+			if(stock<=pStock) {
+				SalesDao sd = new SalesDao();
+				sd.sales(ub,cart,connection);
+				pd.update(pStock-stock,cd,connection);
+
+
+
+			}else {
+				request.setAttribute("error", "在庫が無いか在庫数を超えた発注になっています。");
+				RequestDispatcher rd = request.getRequestDispatcher("/view/Confirmation.jsp");
+				rd.forward(request,response);
+				connection.rollback();
+			}
+
+			}
+
+			connection.commit();
+
+		} catch (SQLException e) {
+			// TODO 自動生成された catch ブロック
+			try {
+
+
+
+				connection.rollback();
+			}catch(SQLException ex){
+System.out.println("SQLExceptionだお");
+			}
+
 		}
-		ArrayList<ProductBean> product =pd.kensaku(name);
+		RequestDispatcher rd = request.getRequestDispatcher("/view/Complete.jsp");
+		rd.forward(request,response);
 
-		for(int b = 0;b<product.size();b++) {
-			pb=product.get(b);
-
-			pStock=pb.getStock_no();
-		}
-
-		if(stock>pStock) {
-			request.setAttribute("error", "在庫が無いか在庫数を超えた発注になっています。");
-			RequestDispatcher rd = request.getRequestDispatcher("/view/Confirmation.jsp");
-			rd.forward(request,response);
-		}
-
-		if(stock<=pStock) {
-			SalesDao sd = new SalesDao();
-			sd.sales(ub,cart);
-			pd.update(pStock-stock,cd);
-
-			RequestDispatcher rd = request.getRequestDispatcher("/view/Complete.jsp");
-			rd.forward(request,response);
-
-		}
 
 	}
 
-}
+
+	}
+
+

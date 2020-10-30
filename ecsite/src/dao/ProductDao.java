@@ -19,6 +19,7 @@ public class ProductDao {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 
+
 		ArrayList<ProductBean> apb =new ArrayList<ProductBean>();
 
 		ResultSet rs = null;
@@ -332,11 +333,8 @@ public class ProductDao {
 
 
 	}
-	public void update(int a,int b){
-		String url = "jdbc:mysql://localhost/ecsite";
-		String id = "root";
-		String pass = "password";
-		Connection conn = null;
+	public void update(int a,int b,Connection conn){
+
 		PreparedStatement pstmt = null;
 		ProductBean pb = new ProductBean();
 
@@ -344,17 +342,13 @@ public class ProductDao {
 
 		ResultSet rs = null;
 
-		{
+
 		//JDBcドライバの登録
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
-		}
+
 		//データベースへの接続
 		try {
 			//SQLの発行
-			conn = DriverManager.getConnection(url, id, pass);
+
 
 
 			String query = "update product set stock_no=? where pro_cd=?";
@@ -375,8 +369,7 @@ public class ProductDao {
 					rs.close();
 				if (pstmt != null)
 					pstmt.close();
-				if (conn != null)
-					conn.close();
+
 			} catch (Exception ex) {
 			}
 
@@ -386,7 +379,7 @@ public class ProductDao {
 
 
 
-	}
+
 	public ProductBean product(int a){
 		String url = "jdbc:mysql://localhost/ecsite";
 		String id = "root";

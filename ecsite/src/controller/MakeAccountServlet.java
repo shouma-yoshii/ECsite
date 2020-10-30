@@ -9,24 +9,21 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
-import dao.CategoryDao;
 import dao.UserDao;
-import model.CategoryBean;
 import model.UserBean;
 
 /**
- * Servlet implementation class LoginServlet
+ * Servlet implementation class MakeAccountServlet
  */
-@WebServlet("/login")
-public class LoginServlet extends HttpServlet {
+@WebServlet("/MakeAccount")
+public class MakeAccountServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public LoginServlet() {
+    public MakeAccountServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -36,10 +33,8 @@ public class LoginServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		request.setCharacterEncoding("UTF-8");
 
-
-		RequestDispatcher rd = request.getRequestDispatcher("/view/Login.jsp");
+		RequestDispatcher rd = request.getRequestDispatcher("/view/MakeAccount.jsp");
 		rd.forward(request,response);
 	}
 
@@ -49,55 +44,29 @@ public class LoginServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		request.setCharacterEncoding("UTF-8");
-		UserBean ub = new UserBean();
-		String name =request.getParameter("name");
-		String pw =request.getParameter("pass");
-
-
-		if(name.equals("") || pw.equals("")) {
-			request.setAttribute("error", "名前またはパスワードを入力してください");
-			RequestDispatcher rd = request.getRequestDispatcher("/view/Login.jsp");
-			rd.forward(request,response);
-			return;
-		}
-
 
 		UserDao ud =new UserDao();
-		ub=ud.login(name, pw);
+		String name =request.getParameter("id");
+		String password=request.getParameter("password");
 
 
-		if(ub.getId() ==0) {
-
-			request.setAttribute("error", "名前またはパスワードが一致しません");
-			RequestDispatcher rd = request.getRequestDispatcher("/view/Login.jsp");
+		if(name.equals("")||password.equals("")) {
+			request.setAttribute("error", "IDまたはパスワードが入力されていません。");
+			RequestDispatcher rd = request.getRequestDispatcher("/view/MakeAccount.jsp");
 			rd.forward(request,response);
-			return;
-
-		}else {
-
-			HttpSession sc = request.getSession(true);
-			sc.setAttribute("ui", ub);
-
-			CategoryDao cd = new CategoryDao();
-			ArrayList<CategoryBean> list2 = cd.Category();
-			sc.setAttribute("Category", list2);
-			RequestDispatcher rd = request.getRequestDispatcher("/view/Search.jsp");
-			rd.forward(request,response);
-			return;
 		}
 
-
-
-
-
-
-
-
-
-
-
-
-
+		ArrayList<UserBean> aub =ud.make(name, password);
+		if(aub.size()==0) {
+			ud.MakeAccount(name, password);
+			request.setAttribute("set","アカウント作成完了しました。" );
+			RequestDispatcher rd = request.getRequestDispatcher("/view/Login.jsp");
+			rd.forward(request,response);
+		}else {
+			request.setAttribute("error","ユーザー名またはパスワードが既に使用されています。" );
+			RequestDispatcher rd = request.getRequestDispatcher("/view/MakeAccount.jsp");
+			rd.forward(request,response);
+		}
 
 
 
